@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSACIST CGPA Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef4ff,#f5f7fb);color:#172033;min-height:100vh;padding:28px 16px}
+.wrap{max-width:900px;margin:auto}
+header{text-align:center;margin-bottom:24px}
+header h1{margin:0 0 8px;font-size:clamp(26px,5vw,36px);color:#102c59}
+header p{margin:0;color:#61708a}
+.panel{background:white;border:1px solid #e4eaf3;border-radius:18px;padding:22px;box-shadow:0 12px 35px #17365d12}
+.semesters{display:grid;gap:12px}
+.semester{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:12px;align-items:end;border:1px solid #e5eaf1;border-radius:14px;padding:14px;background:#fbfcff}
+label{display:block;font-size:13px;font-weight:650;color:#52627b;margin-bottom:6px}
+input{width:100%;padding:12px;border:1px solid #cfd8e6;border-radius:10px;font-size:16px;outline:none}
+input:focus{border-color:#356ac3;box-shadow:0 0 0 3px #356ac320}
+.remove{border:0;border-radius:10px;background:#fff0f0;color:#b42318;padding:12px 14px;font-weight:700;cursor:pointer}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{cursor:pointer;font-weight:700;border-radius:11px;padding:12px 16px;border:0;font-size:14px}
+.add{background:#e9f1ff;color:#174b91}.reset{background:#f0f2f5;color:#445168}
+.result{margin-top:22px;padding:22px;border-radius:16px;background:#102c59;color:white;text-align:center}
+.result small{display:block;color:#cfddf3;font-size:14px;margin-bottom:7px}
+.result strong{font-size:clamp(36px,8vw,52px);letter-spacing:1px}
+.result .details{margin-top:12px;color:#d7e5ff;font-size:14px}
+.note{color:#697991;font-size:13px;line-height:1.6;margin:18px 2px 0}
+@media(max-width:650px){.semester{grid-template-columns:1fr 1fr}.semester .name{grid-column:1/-1}.semester .remove{width:100%}.panel{padding:15px}}
+
+footer{max-width:900px;margin:20px auto 0;text-align:center;color:#66758d;font-size:13px;padding:14px 10px}
+footer .author{font-weight:700;color:#102c59}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>BSACIST CGPA Calculator</h1>
+<p>Calculate your overall CGPA using semester GPA and credits</p>
+</header>
+<main class="panel">
+<div id="semesters" class="semesters"></div>
+<div class="actions">
+<button class="add" onclick="addSemester()">＋ Add Semester</button>
+<button class="reset" onclick="resetAll()">Reset</button>
+</div>
+<div class="result" aria-live="polite">
+<small>Your Credit-Weighted CGPA</small>
+<strong id="cgpa">0.00</strong>
+<div class="details" id="details">Total credits: 0 · Weighted points: 0.00</div>
+</div>
+<p class="note">Formula: CGPA = Σ (Semester GPA × Semester Credits) ÷ Σ Semester Credits. This calculator uses the credit-weighted method; verify official rounding and regulations with your institution.</p>
+</main>
+</div>
+<script>
+let count=0;
+function addSemester(gpa='',credits=''){
+  count++;
+  const row=document.createElement('div');
+  row.className='semester';
+  row.innerHTML=`
+    <div class="name"><label>Semester</label><input class="semname" value="Semester ${count}" aria-label="Semester name"></div>
+    <div><label>GPA (0–10)</label><input class="gpa" type="number" min="0" max="10" step="0.01" placeholder="e.g. 8.36" value="${gpa}"></div>
+    <div><label>Credits</label><input class="credits" type="number" min="0" step="1" placeholder="e.g. 22" value="${credits}"></div>
+    <button class="remove" title="Remove semester" onclick="this.parentElement.remove();calculate()">Remove</button>`;
+  document.getElementById('semesters').appendChild(row);
+  row.querySelectorAll('input').forEach(input=>input.addEventListener('input',calculate));
+  calculate();
+}
+function calculate(){
+  let weighted=0,totalCredits=0,invalid=false;
+  document.querySelectorAll('.semester').forEach(row=>{
+    const g=parseFloat(row.querySelector('.gpa').value);
+    const c=parseFloat(row.querySelector('.credits').value);
+    if(row.querySelector('.gpa').value!=='' && row.querySelector('.credits').value!=='' && Number.isFinite(g)&&Number.isFinite(c)&&g>=0&&g<=10&&c>0){
+      weighted+=g*c;totalCredits+=c;
+    } else if(row.querySelector('.gpa').value!==''||row.querySelector('.credits').value!==''){
+      invalid=true;
+    }
+  });
+  document.getElementById('cgpa').textContent=totalCredits?(weighted/totalCredits).toFixed(2):'0.00';
+  document.getElementById('details').textContent=`Total credits: ${totalCredits} · Weighted points: ${weighted.toFixed(2)}${invalid?' · Check incomplete or invalid entries':''}`;
+}
+function resetAll(){
+  document.getElementById('semesters').innerHTML='';
+  count=0;addSemester();addSemester();calculate();
+}
+addSemester(8.36,22);addSemester(9.58,24);
+</script>
+
+<footer>
+  <div>Designed &amp; Developed by <span class="author">Mr. C. Anilesh</span></div>
+  <div>MCA Student | BSACIST</div>
+  <div>&copy; 2026 &middot; CGPA Calculator</div>
+</footer>
+</body>
+</html>
